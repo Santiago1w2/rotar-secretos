@@ -1,10 +1,10 @@
-# Desplegar este servicio UNA sola vez: --stage lab.
+org: santiagomorales
 service: rotacion-secretos-alumnos
 
 provider:
   name: aws
   runtime: python3.13
-  region: us-east-1  # Debe coincidir con RDS, SSM y Secrets Manager.
+  region: us-east-1  
   memorySize: 256
   timeout: 120
   iam:
@@ -14,7 +14,6 @@ provider:
     APP_SECRET_PREFIX: rds_mysql_alumnos
     PARAMETER_PREFIX: /rds_mysql_alumnos
     MYSQL_ACCOUNT_HOST: '%'
-  # Copiar vpc de la API original si tu base lo requiere.
 
 package:
   patterns:
@@ -29,4 +28,4 @@ functions:
       - schedule:
           name: rotar-secretos-alumnos-${sls:stage}
           rate: rate(10 minutes)
-          enabled: true  # Cambiar a true despues de la prueba manual.
+          enabled: true  
