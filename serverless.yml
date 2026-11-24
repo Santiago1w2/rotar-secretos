@@ -1,0 +1,32 @@
+# Desplegar este servicio UNA sola vez: --stage lab.
+service: rotacion-secretos-alumnos
+
+provider:
+  name: aws
+  runtime: python3.13
+  region: us-east-1  # Debe coincidir con RDS, SSM y Secrets Manager.
+  memorySize: 256
+  timeout: 120
+  iam:
+    role: arn:aws:iam::${aws:accountId}:role/LabRole
+  environment:
+    ADMIN_SECRET_ID: rds_mysql_alumnos/admin
+    APP_SECRET_PREFIX: rds_mysql_alumnos
+    PARAMETER_PREFIX: /rds_mysql_alumnos
+    MYSQL_ACCOUNT_HOST: '%'
+  # Copiar vpc de la API original si tu base lo requiere.
+
+package:
+  patterns:
+    - '!__pycache__/**'
+    - '!.git/**'
+    - '!requirements.txt'
+
+functions:
+  rotar:
+    handler: RotarSecretos.lambda_handler
+    events:
+      - schedule:
+          name: rotar-secretos-alumnos-${sls:stage}
+          rate: rate(10 minutes)
+          enabled: true  # Cambiar a true despues de la prueba manual.
